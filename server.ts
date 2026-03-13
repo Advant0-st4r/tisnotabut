@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import Database from "better-sqlite3";
 import multer from "multer";
@@ -29,7 +28,6 @@ if (JWT_SECRET === "fallback_secret_for_dev") {
 } else {
   console.warn("WARNING: JWT_SECRET is using the fallback value. Do not use this in production.");
 }
-
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -626,6 +624,17 @@ Legacy CRM,Customer Management,Account Updates,Sales,On-Prem`;
   });
 
   app.listen(PORT, HOST);
+
+  // Serve static files from root and public/dist
+  const staticRoot = path.resolve(__dirname);
+  app.use(express.static(staticRoot));
+
+  // SPA fallback — send index.html for everything else
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(staticRoot, "index.html"));
+  });
 }
 
 startServer();
+
+

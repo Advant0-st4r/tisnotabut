@@ -617,18 +617,7 @@ Legacy CRM,Customer Management,Account Updates,Sales,On-Prem`;
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
   // --- Vite Integration ---
-  if (!isProd) {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.resolve(__dirname, "dist")));
-    app.use((req, res) => {
-      res.sendFile(path.resolve(__dirname, "dist/index.html"));
-    });
-  }
+  const isProd = process.env.NODE_ENV === "production";
 
   // Global Error Handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

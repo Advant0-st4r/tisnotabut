@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Solution/scratch files
+solutions/
+
+# npm lockfile (we use pnpm)
+package-lock.json

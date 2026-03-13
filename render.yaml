@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: capmap-web
+    env: node
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile ; pnpm run build
+    startCommand: node server.ts
+    healthCheckPath: /health
+    healthCheckIntervalSeconds: 5
+    healthCheckTimeoutSeconds: 5
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000

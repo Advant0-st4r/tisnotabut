@@ -1,0 +1,61 @@
+{
+  "name": "capmap",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "powershell -Command \"if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }; if (Test-Path dist) { Remove-Item -Recurse -Force dist }\"",
+    "lint": "tsc --noEmit",
+    "start": "node server.ts"
+  },
+  "dependencies": {
+    "@google/genai": "1.45.0",
+    "@tailwindcss/vite": "4.2.1",
+    "@vitejs/plugin-react": "6.0.0",
+    "bcryptjs": "3.0.3",
+    "better-sqlite3": "12.6.2",
+    "clsx": "2.1.1",
+    "cookie-parser": "1.4.7",
+    "dotenv": "17.3.1",
+    "exceljs": "4.4.0",
+    "express": "5.2.1",
+    "json2csv": "6.0.0-alpha.2",
+    "jsonwebtoken": "9.0.3",
+    "lucide-react": "0.577.0",
+    "motion": "12.36.0",
+    "multer": "2.1.1",
+    "papaparse": "5.5.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-router-dom": "7.13.1",
+    "recharts": "3.8.0",
+    "tailwind-merge": "3.5.0",
+    "tailwindcss": "4.2.1",
+    "vite": "8.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "3.0.0",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.6",
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/multer": "2.1.0",
+    "@types/node": "25.5.0",
+    "@types/papaparse": "5.5.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "autoprefixer": "10.4.27",
+    "postcss": "8.5.8",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild"]
+  }
+}

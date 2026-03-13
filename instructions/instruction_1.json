@@ -1,0 +1,108 @@
+{
+    "timestamp": "2026-03-12T00:00:00Z",
+    "status": "finalized",
+    "top_p0_actions": [
+        {
+            "id": "R1",
+            "title": "Write snapshot after bulk upload",
+            "owner": "backend_lead",
+            "est_hours": 0.5,
+            "commands": [
+                "apply patch to /api/capabilities/bulk: add transactional INSERT INTO capability_snapshots(user_id, avg_maturity) VALUES ($1,$2)",
+                "git add -A && git commit -m "fix: write capability_snapshots after bulk upload""
+            ],
+            "rollback_cmd": "git revert HEAD",
+            "risk": "low"
+        },
+        {
+            "id": "R2",
+            "title": "Daily idempotent dashboard snapshot",
+            "owner": "sre/backend_lead",
+            "est_hours": 0.5,
+            "commands": [
+                "apply patch to /api/dashboard: run idempotent INSERT (WHERE NOT EXISTS on snapshot_date = CURRENT_DATE)",
+                "git add -A && git commit -m "feat: daily idempotent snapshot write""
+            ],
+            "rollback_cmd": "git revert HEAD",
+            "risk": "low"
+        },
+        {
+            "id": "R3",
+            "title": "Fix CSV header validation (shared validator)",
+            "owner": "frontend_backend",
+            "est_hours": 1.0,
+            "commands": [
+                "replace rows-based check with header-check: parse first row headers; trim().toLowerCase(); accept header 'capability' or 'name'",
+                "extract validator to packages/validator/csv.js and import in frontend + backend",
+                "git add -A && git commit -m "fix: header-based CSV validation and shared validator""
+            ],
+            "rollback_cmd": "git revert HEAD",
+            "risk": "low"
+        },
+        {
+            "id": "R4",
+            "title": "Publish deterministic sample.csv + UI schema display",
+            "owner": "frontend_lead",
+            "est_hours": 0.5,
+            "commands": [
+                "add /public/sample.csv with exact headers and example row",
+                "update upload page to link /public/sample.csv and show minimal schema block",
+                "git add -A && git commit -m "chore: add sample.csv and UI schema guidance""
+            ],
+            "rollback_cmd": "git revert HEAD",
+            "risk": "low"
+        }
+    ],
+    "p1_actions": [
+        {
+            "id": "R5",
+            "title": "Centralize CSV validator + tests",
+            "owner": "qa_lead/frontend_backend",
+            "est_hours": 3.0,
+            "notes": "Add unit tests and CI check; do not auto-apply until P0s verified"
+        },
+        {
+            "id": "R6",
+            "title": "Harden startup JWT handling",
+            "owner": "devops",
+            "est_hours": 0.5,
+            "notes": "Replace uncaught throw with explicit startup check + process.exit(1) and health-check endpoint"
+        }
+    ],
+    "p2_actions": [
+        {
+            "id": "R7",
+            "title": "E2E test: sample CSV → DB rows → snapshot",
+            "owner": "qa_lead",
+            "est_hours": 4.0,
+            "notes": "Playwright/Vitest smoke to validate full loop"
+        }
+    ],
+    "slos": {
+        "metrics_generation_availability": "99.5% uptime",
+        "metrics_generation_latency": "95th percentile ≤ 10s",
+        "snapshot_persistence": "100% of successful bulk uploads write snapshot within same transaction",
+        "csv_upload_success_sample": "sample CSV uploads and ingests in <30s"
+    },
+    "acceptance_criteria": [
+        "AC1: Upload /public/sample.csv via UI → capabilities populated AND capability_snapshots row inserted within 1 minute",
+        "AC2: Valid CSV with header 'capability' or 'name' (even if some rows blank) is accepted; backend does not reject based on blank rows alone",
+        "AC3: Dashboard shows trend line after two snapshots exist",
+        "AC4: CI step `cp .env.example .env && pnpm test` passes validator tests on PR"
+    ],
+    "rollback_principles": [
+        "Small atomic commits per feature branch",
+        "Prefer config/env change + feature-flag over code changes when possible",
+        "DB changes reversible via migration rollback or targeted deletes on test/demo rows"
+    ],
+    "artifacts_to_produce": [
+        "patch snippets for /api/capabilities/bulk and /api/dashboard (idempotent INSERT)",
+        "packages/validator/csv.js with unit tests",
+        "/public/sample.csv and upload page UI schema text",
+        "CI update to run CSV validator test and sample upload smoke test",
+        "migration notes describing snapshot INSERT behaviour"
+    ],
+    "one_line_justification": "Write snapshots and fix header validation immediately: low-risk atomic fixes that restore the core analysis loop and enable UX value.",
+    "parallelization_guidance": "Apply R1+R2 concurrently; start R3 in parallel; defer R5/R7 until P0s validated.",
+    "final_status": "ready_for_prs"
+}

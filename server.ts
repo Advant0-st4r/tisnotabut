@@ -18,18 +18,18 @@ import { validateCSVHeaders } from "./packages/validator/csv.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isProd = process.env.NODE_ENV === "production";
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = "0.0.0.0";
+
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_dev";
 
 if (JWT_SECRET === "fallback_secret_for_dev") {
-  if (isProd) {
-    console.error("FATAL: JWT_SECRET is using the fallback value in production. This is a critical security risk.");
-    process.exit(1);
-  } else {
-    console.warn("WARNING: JWT_SECRET is using the fallback value. Do not use this in production.");
-  }
+  console.error("FATAL: JWT_SECRET is using the fallback value in production. This is a critical security risk.");
+  process.exit(1);
+} else {
+  console.warn("WARNING: JWT_SECRET is using the fallback value. Do not use this in production.");
 }
+
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -187,7 +187,11 @@ async function startServer() {
         user = { id, email, role: "user" };
       }
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "24h" });
-      res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" });
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax"
+      });
       res.json({ id: user.id, email: user.email, role: user.role });
     } catch (err) {
       next(err);
@@ -632,9 +636,7 @@ Legacy CRM,Customer Management,Account Updates,Sales,On-Prem`;
     res.status(500).json({ error: "Internal Server Error", details: err.message });
   });
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  app.listen(PORT, HOST);
 }
 
 startServer();
